@@ -43,3 +43,13 @@ class User(Base):
         )
     )
 
+class Admin(Base):
+    __tablename__="admins"
+
+    id=Column(Integer, primary_key=True, nullable=False)
+    name=Column(String, nullable=False)
+    password=Column(String, nullable=False)
+    location=Column(String,nullable=False)
+    availability=Column(String, nullable=False)
+    response_radius=Column(Integer,nullable=False)
+    current_status=Column(String,nullable=False)

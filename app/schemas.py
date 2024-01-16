@@ -31,6 +31,16 @@ class UserOut(BaseModel):
         orm_mode=True
 
 
+class AdminOut(BaseModel):
+    name: str
+    location: str
+    availability: Optional[str]
+    response_radius: Optional[int]
+    current_status: Optional[str]
+
+    class config:
+        orm_mode=True
+
 
 class PostResponse(PostBase):
     id: int
@@ -50,6 +60,15 @@ class UserCreate(BaseModel):
     name: str
     age: Optional[int] = None
     home_location: str
+
+
+class AdminCreate(BaseModel):
+    name: str
+    password: str
+    location: str
+    availability: Optional[str] = "24/7"
+    response_radius: Optional[int]= 50
+    current_status: Optional[str]= 'unknown'
 
 
 
