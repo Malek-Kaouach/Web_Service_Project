@@ -32,6 +32,7 @@ class UserOut(BaseModel):
 
 
 class AdminOut(BaseModel):
+    id: int
     name: str
     location: str
     availability: Optional[str]
