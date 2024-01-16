@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from ..database import get_db
 
-from ..googlemaps.maps import get_google_maps_link, get_current_location
+from ..googlemaps.maps import get_google_maps_link, get_current_location,set_location
 
 
 router=APIRouter(
@@ -37,14 +37,8 @@ def create_posts(post:schemas.PostCreate, db: Session = Depends(get_db),
     #print(**post.dict()) unpack dictionnary
     #print(current_user.id)
     
-    if not post.location:
-        #call google maps API to get location by IP adress
-        location=get_current_location()
-        post.location=f"{location[0]}, {location[1]}"
-        post.location_link=f"{location[2]}"
-    else:
-        # Generate the Google Maps link based on the user's location
-        post.location_link = get_google_maps_link(post.location)
+    # Call the set_location function to set the location and location link
+    post.location, post.location_link = set_location(post.location, post.location_link)
 
     new_alert = models.Post(owner_id=current_user.id, owner_phone_number=current_user.phone_number, **post.dict()) 
 
@@ -111,6 +105,11 @@ def update_post(id:int, post:schemas.PostCreate,db: Session = Depends(get_db),cu
     
     if alert.owner_id!=current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
+    
+    
+    # Call the set_location function to set the location and location link
+    post.location, post.location_link = set_location(post.location, post.location_link)
+
     
     alert_query.update(post.dict(),synchronize_session=False)
     db.commit()

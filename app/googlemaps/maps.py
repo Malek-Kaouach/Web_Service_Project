@@ -38,3 +38,16 @@ def get_google_maps_link(location: str) -> str:
 
 
 
+def set_location(location: str, location_link: str):
+    if not location:
+        # Call the get_current_location function to retrieve the location and location link
+        lat, lng, maps_link = get_current_location()
+        location = f"{lat}, {lng}"
+        location_link = maps_link
+    else:
+        # Generate the Google Maps link based on the user's location
+        location_link = get_google_maps_link(location)
+
+    return location, location_link
+
+
