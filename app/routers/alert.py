@@ -4,6 +4,9 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from ..database import get_db
 
+from ..googlemaps.maps import get_google_maps_link, get_current_location
+
+
 router=APIRouter(
     prefix="/alerts",
     tags=['Alerts']
@@ -24,7 +27,8 @@ def get_posts(db: Session = Depends(get_db),current_user: int = Depends(oauth2.g
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED,response_model=schemas.PostResponse)
-def create_posts(post:schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+def create_posts(post:schemas.PostCreate, db: Session = Depends(get_db), 
+                    current_user: int = Depends(oauth2.get_current_user)):
 
     #cursor.execute(""" INSERT INTO alerts (title, content, location, published) VALUES (%s, %s, %s, %s) RETURNING * """,(post.title, post.content, 
     #post.location, post.published))
@@ -32,7 +36,18 @@ def create_posts(post:schemas.PostCreate, db: Session = Depends(get_db), current
     #conn.commit()
     #print(**post.dict()) unpack dictionnary
     #print(current_user.id)
-    new_alert=models.Post(owner_id=current_user.id,owner_phone_number=current_user.phone_number ,**post.dict())
+    
+    if not post.location:
+        #call google maps API to get location by IP adress
+        location=get_current_location()
+        post.location=f"{location[0]}, {location[1]}"
+        post.location_link=f"{location[2]}"
+    else:
+        # Generate the Google Maps link based on the user's location
+        post.location_link = get_google_maps_link(post.location)
+
+    new_alert = models.Post(owner_id=current_user.id, owner_phone_number=current_user.phone_number, **post.dict()) 
+
     db.add(new_alert)
     db.commit()
     db.refresh(new_alert) #retrieve the new_alert and store it into the new variable new_alert

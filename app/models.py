@@ -12,10 +12,11 @@ class Post(Base):
     title=Column(String, nullable=False)
     content=Column(String,nullable=False)
     location=Column(String,nullable=False)
+    location_link=Column(String,nullable=False)
     published=Column(Boolean,server_default='TRUE',nullable=False)
     created_at=Column(TIMESTAMP(timezone=False),nullable=False,server_default=text('now()'))
     owner_id=Column(Integer, ForeignKey("users.id",ondelete="CASCADE"), nullable=False)
-    owner_phone_number=Column(String, ForeignKey("users.phone_number",ondelete="CASCADE"),nullable=False, unique=True)
+    owner_phone_number=Column(String, ForeignKey("users.phone_number",ondelete="CASCADE"),nullable=False)
     status=Column(String,server_default='Waiting for response',nullable=False)
 
     owner = relationship("User", foreign_keys=[owner_id])

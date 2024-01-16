@@ -2,10 +2,14 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
+
 class PostBase(BaseModel):
     title: str
     content: str
-    location: str
+    location: Optional[str]=""
+    location_link: Optional[str]= "MAPS LINK"
+    #choosing a dummy variable in order to not get an empty input error
+    #location_link will use the value of the location to transform it into google maps link
     published: bool = True
 
 
@@ -31,8 +35,8 @@ class UserOut(BaseModel):
 class PostResponse(PostBase):
     id: int
     created_at: datetime
-    owner_id: int
-    owner_phone_number: int
+    #owner_id: int
+    #owner_phone_number: int
     status: str
     owner: UserOut
     
