@@ -13,6 +13,9 @@ router=APIRouter(
 )
 
 
+
+# Get all alerts endpoint
+
 @router.get("/",response_model=List[schemas.PostResponse])
 def get_alerts(db: Session = Depends(get_db),
                current_admin: Optional[models.Admin] = Depends(oauth2.get_admin),
@@ -33,6 +36,8 @@ def get_alerts(db: Session = Depends(get_db),
     return alerts
 
 
+
+# Create alert endpoint
 
 @router.post("/", status_code=status.HTTP_201_CREATED,response_model=schemas.PostResponse)
 def create_alert(post:schemas.PostCreate, db: Session = Depends(get_db), 
@@ -57,6 +62,8 @@ def create_alert(post:schemas.PostCreate, db: Session = Depends(get_db),
 
 
 
+# Get alert by ID endpoint
+
 @router.get("/{id}",response_model=schemas.PostResponse)
 def get_alert(id: int,db: Session = Depends(get_db),
               current_admin: Optional[models.Admin] = Depends(oauth2.get_admin),
@@ -80,6 +87,8 @@ def get_alert(id: int,db: Session = Depends(get_db),
     return alert
 
 
+
+# Delete alert by ID endpoint
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_alert(id: int,db: Session = Depends(get_db),
@@ -111,6 +120,8 @@ def delete_alert(id: int,db: Session = Depends(get_db),
 
 
 
+# Update alert by ID endpoint
+
 @router.put("/{id}",response_model=schemas.PostResponse)
 def update_alert(id:int, post:schemas.PostCreate,db: Session = Depends(get_db),
                  current_admin: Optional[models.Admin] = Depends(oauth2.get_admin),
@@ -134,6 +145,25 @@ def update_alert(id:int, post:schemas.PostCreate,db: Session = Depends(get_db),
     # Call the set_location function to set the location and location link
     post.location, post.location_link = set_location(post.location, post.location_link)
 
+    alert_query.update(post.dict(),synchronize_session=False)
+    db.commit()
+
+    return alert_query.first()
+
+
+
+# Update status alert by ID endpoint
+
+@router.put("/status/{id}",response_model=schemas.PostResponse)
+def update_status(id: int, post:schemas.PostStatus, db: Session = Depends(get_db),
+                  current_admin: int = Depends(oauth2.get_current_admin)):
+
+    alert_query=db.query(models.Post).filter(models.Post.id==id)
+    alert=alert_query.first()
+
+    if alert==None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} does not exist")
+    
     alert_query.update(post.dict(),synchronize_session=False)
     db.commit()
 

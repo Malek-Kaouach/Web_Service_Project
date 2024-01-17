@@ -7,8 +7,9 @@ from ..database import get_db
 
 
 router=APIRouter(tags=['Authentication'])
-#access_token= None
 
+
+# Login admin and user endpoint
 """
 @router.post('/loginuser',response_model=schemas.Token)
 def login_user(user_credentials: OAuth2PasswordRequestForm=Depends(), db: Session=Depends(get_db)):
@@ -54,8 +55,6 @@ def login_admin(user_credentials: OAuth2PasswordRequestForm=Depends(), db: Sessi
 
 @router.post('/login', response_model=schemas.Token)
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-
-    global access_token
 
     user = db.query(models.User).filter(models.User.phone_number == user_credentials.username).first()
     admin = db.query(models.Admin).filter(models.Admin.id == user_credentials.username).first()

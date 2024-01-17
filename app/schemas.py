@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
+from sqlalchemy.sql.sqltypes import TIMESTAMP
+
 
 class PostBase(BaseModel):
     title: str
@@ -18,10 +20,20 @@ class PostCreate(PostBase):
 
 
 class PostStatus(BaseModel):
-    published: bool = True
+    status: str
+
+
+class AdminStatus(BaseModel):
+    current_status: str
+
+
+class UserPWD(BaseModel):
+    password: str
+
 
 
 class UserOut(BaseModel):
+    id: int
     phone_number: str
     name: str
     age: Optional[int]
@@ -29,6 +41,10 @@ class UserOut(BaseModel):
 
     class config:
         orm_mode=True
+
+
+class UserDetails(UserOut):
+    password: str
 
 
 class AdminOut(BaseModel):
