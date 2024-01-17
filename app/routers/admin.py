@@ -3,7 +3,7 @@ from .. import models, schemas, utils
 from fastapi import Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session 
 from ..database import get_db
-from typing import List
+from typing import List, Optional
 
 
 
@@ -18,7 +18,7 @@ router=APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.AdminOut)
 
-def create_admin(admin: schemas.AdminCreate, db: Session = Depends(get_db)):
+def create_admin(admin: schemas.AdminCreate, db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
 
     #hash the password - admin.password
     hashed_password=utils.hash(admin.password)
@@ -32,14 +32,16 @@ def create_admin(admin: schemas.AdminCreate, db: Session = Depends(get_db)):
 
 
 
-
 #get all admins endpoint
 
 @router.get('/', response_model=List[schemas.AdminOut])
 
-def get_all_admins(db: Session = Depends(get_db)):
+def get_all_admins(db: Session = Depends(get_db),
+                   current_admin: int = Depends(oauth2.get_current_admin),
+                   limit: Optional[int]=100, skip: Optional[int]=0,
+                   search: Optional[str]= ""): #search filter by admin name
 
-    admins = db.query(models.Admin).all()
+    admins = db.query(models.Admin).filter(models.Admin.name.contains(search)).limit(limit).offset(skip).all()
     return admins
 
 
@@ -48,7 +50,7 @@ def get_all_admins(db: Session = Depends(get_db)):
 
 @router.get('/{id}',response_model=schemas.AdminOut)
 
-def get_admin(id:int,db: Session = Depends(get_db)):
+def get_admin(id:int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
 
     admin= db.query(models.Admin).filter(models.Admin.id==id).first()
     if not admin:
@@ -61,7 +63,7 @@ def get_admin(id:int,db: Session = Depends(get_db)):
 #delete admin endpoint
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_admin(id: int,db: Session = Depends(get_db)):
+def delete_admin(id: int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
 
     alert_query=db.query(models.Admin).filter(models.Admin.id==id)
 

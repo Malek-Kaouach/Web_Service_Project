@@ -1,5 +1,5 @@
 from .. import models, schemas, oauth2
-from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
+from fastapi import Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session 
 from typing import List, Optional
 from ..database import get_db
@@ -12,23 +12,31 @@ router=APIRouter(
     tags=['Alerts']
 )
 
+
 @router.get("/",response_model=List[schemas.PostResponse])
-def get_posts(db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user),
-               limit: int=2, skip: int=2,search: Optional[str]= ""):
-    #cursor.execute("""SELECT * FROM alerts""")
-    #alerts=cursor.fetchall() 
+def get_alerts(db: Session = Depends(get_db),
+               current_admin: Optional[models.Admin] = Depends(oauth2.get_admin),
+               current_user: Optional[models.User] = Depends(oauth2.get_user),
+               limit: Optional[int]=100, skip: Optional[int]=0,
+               search: Optional[str]= ""): #search filter by title of alert
 
-    #print(current_user)
+    if current_admin:
+        #admin have the access to all the alerts
+        # Fetch posts for admins
+        alerts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
 
-    #alerts=db.query(models.Post).filter(models.Post.owner_id == current_user.id).all()
-    alerts=db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    elif current_user:
+        #user have the access only to his own alerts to view
+        # Fetch posts for regular users
+        alerts = db.query(models.Post).filter(models.Post.owner_id == current_user.id).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+
     return alerts
 
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED,response_model=schemas.PostResponse)
-def create_posts(post:schemas.PostCreate, db: Session = Depends(get_db), 
-                    current_user: int = Depends(oauth2.get_current_user)):
+def create_alert(post:schemas.PostCreate, db: Session = Depends(get_db), 
+                 current_user: int = Depends(oauth2.get_current_user)):
 
     #cursor.execute(""" INSERT INTO alerts (title, content, location, published) VALUES (%s, %s, %s, %s) RETURNING * """,(post.title, post.content, 
     #post.location, post.published))
@@ -50,7 +58,10 @@ def create_posts(post:schemas.PostCreate, db: Session = Depends(get_db),
 
 
 @router.get("/{id}",response_model=schemas.PostResponse)
-def get_post(id: int,db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+def get_alert(id: int,db: Session = Depends(get_db),
+              current_admin: Optional[models.Admin] = Depends(oauth2.get_admin),
+              current_user: Optional[models.User] = Depends(oauth2.get_user)):
+    
     # cursor.execute("""SELECT * FROM alerts WHERE id=%s""",(str(id),))
     # alert=cursor.fetchone()
 
@@ -61,12 +72,19 @@ def get_post(id: int,db: Session = Depends(get_db),current_user: int = Depends(o
         #response.status_code=status.HTTP_404_NOT_FOUND
         #return {"message": f"post with id: {id} was not found"}
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} was not found")
+    
+    if current_user:
+        if alert.owner_id!=current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
+
     return alert
 
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int,db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+def delete_alert(id: int,db: Session = Depends(get_db),
+                 current_admin: Optional[models.Admin] = Depends(oauth2.get_admin),
+                 current_user: Optional[models.User] = Depends(oauth2.get_user)):
 
     # cursor.execute("""DELETE FROM alerts WHERE id=%s RETURNING * """,(str(id),))
     # deleted_alert=cursor.fetchone()
@@ -79,6 +97,10 @@ def delete_post(id: int,db: Session = Depends(get_db),current_user: int = Depend
     if alert==None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} does not exist")
     
+    if current_user:
+        if alert.owner_id!=current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
+    
     # if alert.owner_id!=current_user.id:
     #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
 
@@ -90,7 +112,9 @@ def delete_post(id: int,db: Session = Depends(get_db),current_user: int = Depend
 
 
 @router.put("/{id}",response_model=schemas.PostResponse)
-def update_post(id:int, post:schemas.PostCreate,db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+def update_alert(id:int, post:schemas.PostCreate,db: Session = Depends(get_db),
+                 current_admin: Optional[models.Admin] = Depends(oauth2.get_admin),
+                 current_user: Optional[models.User] = Depends(oauth2.get_user)):
 
     # cursor.execute("""UPDATE alerts SET title=%s, content=%s, location=%s, published=%s WHERE id=%s RETURNING * """,(post.title, post.content, 
     # post.location, post.published,str(id)))
@@ -103,14 +127,13 @@ def update_post(id:int, post:schemas.PostCreate,db: Session = Depends(get_db),cu
     if alert==None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} does not exist")
     
-    if alert.owner_id!=current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
-    
+    if current_user:
+        if alert.owner_id!=current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
     
     # Call the set_location function to set the location and location link
     post.location, post.location_link = set_location(post.location, post.location_link)
 
-    
     alert_query.update(post.dict(),synchronize_session=False)
     db.commit()
 

@@ -1,8 +1,8 @@
-from .. import models, schemas, utils
+from .. import models, schemas, utils, oauth2
 from fastapi import Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session 
 from ..database import get_db
-from typing import List
+from typing import List, Optional
 
 
 
@@ -32,7 +32,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 # get user by id endpoint
 
 @router.get('/{id}',response_model=schemas.UserOut)
-def get_user(id:int,db: Session = Depends(get_db)):
+def get_user(id:int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
     user= db.query(models.User).filter(models.User.id==id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"user with id: {id} does not exist")
@@ -44,9 +44,12 @@ def get_user(id:int,db: Session = Depends(get_db)):
 
 @router.get('/', response_model=List[schemas.UserOut])
 
-def get_all_users(db: Session = Depends(get_db)):
+def get_all_users(db: Session = Depends(get_db),
+                  current_admin: int = Depends(oauth2.get_current_admin),
+                  limit: Optional[int]=100, skip: Optional[int]=0,
+                  search: Optional[str]= ""): #search filter by phone number
 
-    users = db.query(models.User).all()
+    users = db.query(models.User).filter(models.User.phone_number.contains(search)).limit(limit).offset(skip).all()
     return users
 
 
@@ -55,7 +58,7 @@ def get_all_users(db: Session = Depends(get_db)):
 #delete user endpoint
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(id: int,db: Session = Depends(get_db)):
+def delete_user(id: int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
 
     alert_query=db.query(models.User).filter(models.User.id==id)
 
