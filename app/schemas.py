@@ -31,9 +31,12 @@ class UserPWD(BaseModel):
 
 
 
-class UserOut(BaseModel):
+class UserInfo(BaseModel):
     id: int
     phone_number: str
+
+
+class UserOut(UserInfo):
     name: str
     age: Optional[int]
     home_location: str
@@ -48,9 +51,14 @@ class UserDetails(UserOut):
 
 
 
-class AdminOut(BaseModel):
+class AdminInfo(BaseModel):
     id: int
     name: str
+    class config:
+        orm_mode=True
+
+
+class AdminOut(AdminInfo):
     location: str
     availability: Optional[str]
     response_radius: Optional[int]
@@ -71,6 +79,27 @@ class PostResponse(PostBase):
     
     class config:
         orm_mode=True
+
+
+
+class PostInfo(BaseModel):
+    id: int
+    title: str
+    content: str
+    status: str
+
+
+
+class HistoryOut(BaseModel):
+    id: int
+    edited_at: datetime
+    alert: PostInfo
+    owner: UserInfo
+    admin: AdminInfo
+
+    class config:
+        orm_mode=True
+    
 
 
 class NearestAlerts(PostResponse):

@@ -95,6 +95,7 @@ def get_alert(id: int,db: Session = Depends(get_db),
 
 
 
+# Get alerts in response radius of admin
 
 @router.get("/inradius/{id}", response_model=List[schemas.NearestAlerts])
 def get_alerts(
@@ -133,7 +134,6 @@ def get_alerts(
 
         if distance <= response_radius:
             alert_info.append({"id": alert.id, "distance": distance})
-
         
     print(alert_info)
 
@@ -148,9 +148,6 @@ def get_alerts(
         alert.distance = next(info["distance"] for info in alert_info if info["id"] == alert.id)
 
     return nearest_alerts
-
-
-
 
 
 
@@ -219,7 +216,7 @@ def update_alert(id:int, post:schemas.PostCreate,db: Session = Depends(get_db),
 
 
 
-# Update status alert by ID endpoint
+# Update status alert by ID endpoint and Add the update to History table
 
 @router.put("/status/{id}",response_model=schemas.PostResponse)
 def update_status(id: int, post:schemas.PostStatus, db: Session = Depends(get_db),
@@ -228,10 +225,24 @@ def update_status(id: int, post:schemas.PostStatus, db: Session = Depends(get_db
     alert_query=db.query(models.Post).filter(models.Post.id==id)
     alert=alert_query.first()
 
+
+    history_entry = models.History(
+    alert_id=alert.id,
+    title=alert.title,
+    content=alert.content,
+    location=alert.location,
+    location_link=alert.location_link,
+    owner_id=alert.owner_id,
+    admin_id=current_admin.id,
+    status=post.status
+)
+
     if alert==None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} does not exist")
     
     alert_query.update(post.dict(),synchronize_session=False)
+    
+    db.add(history_entry)
     db.commit()
 
     return alert_query.first()

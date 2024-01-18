@@ -5,6 +5,8 @@ from sqlalchemy.sql.expression import text, cast
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.dialects.postgresql import INTEGER
 
+
+
 class Post(Base):
     __tablename__="alerts"
 
@@ -20,6 +22,28 @@ class Post(Base):
     status=Column(String,server_default='Waiting for response',nullable=False)
 
     owner = relationship("User", foreign_keys=[owner_id])
+
+
+
+
+class History(Base):
+    __tablename__="history"
+
+    id=Column(Integer, primary_key=True, nullable=False)
+    alert_id=Column(Integer, ForeignKey("alerts.id",ondelete="CASCADE"), nullable=False)
+    title=Column(String, nullable=False)
+    content=Column(String,nullable=False)
+    location=Column(String,nullable=False)
+    location_link=Column(String,nullable=False)
+    edited_at=Column(TIMESTAMP(timezone=False),nullable=False,server_default=text('now()'))
+    owner_id=Column(Integer, ForeignKey("users.id",ondelete="CASCADE"), nullable=False)
+    admin_id=Column(Integer, ForeignKey("admins.id",ondelete="CASCADE"), nullable=False)
+    status=Column(String,server_default='Waiting for response',nullable=False)
+
+    owner = relationship ("User", foreign_keys=[owner_id])
+    admin = relationship ("Admin", foreign_keys=[admin_id])
+    alert = relationship ("Post", foreign_keys=[alert_id])
+
 
 
 class User(Base):
@@ -42,6 +66,8 @@ class User(Base):
             name='phone_number_eight_digits'
         )
     )
+
+
 
 class Admin(Base):
     __tablename__="admins"
