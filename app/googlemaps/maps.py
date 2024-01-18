@@ -1,13 +1,15 @@
+from decimal import Decimal
 import googlemaps
 from ..config import settings
+import requests
 
 
-#Google Cloud API KEY
+# Google Cloud API KEY
 API_KEY=settings.api_key
 
 
 
-#get current location based on IP adress when the location is empty as an input
+# Get current location based on IP adress when the location is empty as an input
 
 def get_current_location():
 
@@ -22,7 +24,7 @@ def get_current_location():
 
 
 
-#transform the location inserted into link to google maps search
+# Transform the location inserted into link to google maps search
 
 def get_google_maps_link(location: str) -> str:
     # Clean the location string by removing any leading/trailing spaces
@@ -38,7 +40,7 @@ def get_google_maps_link(location: str) -> str:
 
 
 
-#fuse get_current_location and get_google_maps_link
+# Fuse get_current_location and get_google_maps_link
 
 def set_location(location: str, location_link: str):
     if not location:
@@ -53,3 +55,42 @@ def set_location(location: str, location_link: str):
     return location, location_link
 
 
+
+# Calculate distance between two locations
+
+def calculate_distance(origin, destination):
+    # Google Maps API endpoint
+    url = "https://maps.googleapis.com/maps/api/directions/json"
+
+    # API parameters
+    details = {
+        "origin": origin,            # Origin location (latitude, longitude)
+        "destination": destination,  # Destination location (latitude, longitude)
+        "key": API_KEY               # Google Maps API key
+    }
+
+    # Send GET request to the API
+    response = requests.get(url, params=details)
+    data = response.json()
+
+    # Extract distance from the API response
+    distance_text = data["routes"][0]["legs"][0]["distance"]["text"]
+
+    # Extract numerical value from distance text
+    distance_value = Decimal(''.join(filter(str.isdigit, distance_text)))
+    
+    return distance_value
+
+
+
+def get_coordinates(location: str):
+    gmaps = googlemaps.Client(key=API_KEY)
+    geocode_result = gmaps.geocode(location)
+
+    if geocode_result:
+        lat = geocode_result[0]["geometry"]["location"]["lat"]
+        lng = geocode_result[0]["geometry"]["location"]["lng"]
+        coordinates = f"{lat},{lng}"
+        return coordinates
+    
+    return None

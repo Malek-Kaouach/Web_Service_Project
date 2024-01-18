@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy.sql.sqltypes import TIMESTAMP
 
 
 class PostBase(BaseModel):
@@ -43,8 +42,10 @@ class UserOut(BaseModel):
         orm_mode=True
 
 
+
 class UserDetails(UserOut):
     password: str
+
 
 
 class AdminOut(BaseModel):
@@ -59,6 +60,7 @@ class AdminOut(BaseModel):
         orm_mode=True
 
 
+
 class PostResponse(PostBase):
     id: int
     created_at: datetime
@@ -69,6 +71,12 @@ class PostResponse(PostBase):
     
     class config:
         orm_mode=True
+
+
+class NearestAlerts(PostResponse):
+    distance: Optional[float]
+    class config:
+            orm_mode = True   
 
 
 class UserCreate(BaseModel):
@@ -95,6 +103,7 @@ class UserLogin(BaseModel):
 
 
 class Token(BaseModel):
+    id: int
     access_token: str
     token_type: str
 

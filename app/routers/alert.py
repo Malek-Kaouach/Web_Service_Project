@@ -1,10 +1,17 @@
+import datetime
+from decimal import Decimal
+from sqlalchemy import func
+from geoalchemy2.types import Geography
+
 from .. import models, schemas, oauth2
 from fastapi import Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session 
 from typing import List, Optional
 from ..database import get_db
 
-from ..googlemaps.maps import get_google_maps_link, get_current_location,set_location
+from ..googlemaps.maps import set_location, get_coordinates, calculate_distance
+
+
 
 
 router=APIRouter(
@@ -85,6 +92,66 @@ def get_alert(id: int,db: Session = Depends(get_db),
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
 
     return alert
+
+
+
+
+@router.get("/inradius/{id}", response_model=List[schemas.NearestAlerts])
+def get_alerts(
+    id: int,
+    db: Session = Depends(get_db),
+    current_admin: int = Depends(oauth2.get_current_admin)
+):
+    # Get the admin location
+    admin = db.query(models.Admin).filter(models.Admin.id == id).first()
+    admin_location = admin.location
+
+    # Get the alert locations
+    alerts = (db.query(models.Post).all())
+
+
+    print('response radius = ',admin.response_radius)
+
+    # List to store the IDs of alerts and distances
+    alert_info = []
+
+    for alert in alerts:
+        # Get the latitude and longitude coordinates for the admin's location
+        admin_loc = get_coordinates(admin_location)
+
+        # Get the latitude and longitude coordinates for the alert's location
+        alert_loc = get_coordinates(alert.location)
+
+        if admin_loc is not None and alert_loc is not None:
+            distance = calculate_distance(admin_loc, alert_loc)
+            print(f"distance from alert [{alert.id}] is ",distance)
+        else:
+            print(f"distance from alert [{alert.id}] is None")
+
+        # Convert admin.response_radius to a decimal
+        response_radius = Decimal(admin.response_radius)
+
+        if distance <= response_radius:
+            alert_info.append({"id": alert.id, "distance": distance})
+
+        
+    print(alert_info)
+
+    # Extract alert IDs for the nearest alerts
+    alert_ids = [info["id"] for info in alert_info]
+
+    # Retrieve the nearest alerts from the database
+    nearest_alerts = db.query(models.Post).filter(models.Post.id.in_(alert_ids)).all()
+
+    # Add the distance information to each alert
+    for alert in nearest_alerts:
+        alert.distance = next(info["distance"] for info in alert_info if info["id"] == alert.id)
+
+    return nearest_alerts
+
+
+
+
 
 
 

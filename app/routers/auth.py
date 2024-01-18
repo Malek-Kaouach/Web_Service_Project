@@ -76,5 +76,5 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
         access_token = oauth2.create_access_token(data={"admin_id": id})
 
     # Return the token
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"id": id,"access_token": access_token, "token_type": "bearer"}
     
