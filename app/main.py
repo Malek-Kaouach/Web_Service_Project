@@ -38,7 +38,7 @@ tags_metadata = [
 
 
 app = FastAPI(
-    title="Emergency Report API",
+    title="Accident Report API",
     description="Transportation API: Accident Assistance Support System \n\n Web Service Academic Project \n\n By: Mohamed Malek Kaouach",
     openapi_tags=tags_metadata,
 )
