@@ -63,6 +63,8 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials")
 
     if user:
+        if user.is_banned is True:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are Banned. Contact Support Agents for more information!")
         if not utils.verify(user_credentials.password, user.password):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials")
         id = user.id

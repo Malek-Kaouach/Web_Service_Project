@@ -1,15 +1,11 @@
-import datetime
-from decimal import Decimal
 from sqlalchemy import func
-from geoalchemy2.types import Geography
 
 from .. import models, schemas, oauth2
-from fastapi import Response, status, HTTPException, Depends, APIRouter
+from fastapi import  status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session 
 from typing import List, Optional
 from ..database import get_db
 
-from ..googlemaps.maps import set_location, get_coordinates, calculate_distance
 
 
 

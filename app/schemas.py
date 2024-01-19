@@ -40,10 +40,14 @@ class UserOut(UserInfo):
     name: str
     age: Optional[int]
     home_location: str
+    is_banned: bool
 
     class config:
         orm_mode=True
 
+
+    class config:
+        orm_mode=True
 
 
 class UserDetails(UserOut):
@@ -135,3 +139,7 @@ class Token(BaseModel):
     id: int
     access_token: str
     token_type: str
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
+

@@ -36,8 +36,8 @@ class History(Base):
     location=Column(String,nullable=False)
     location_link=Column(String,nullable=False)
     edited_at=Column(TIMESTAMP(timezone=False),nullable=False,server_default=text('now()'))
-    owner_id=Column(Integer, ForeignKey("users.id",ondelete="CASCADE"), nullable=False)
-    admin_id=Column(Integer, ForeignKey("admins.id",ondelete="CASCADE"), nullable=False)
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=False)
+    admin_id = Column(Integer, ForeignKey("admins.id", ondelete="SET NULL"), nullable=False)
     status=Column(String,server_default='Waiting for response',nullable=False)
 
     owner = relationship ("User", foreign_keys=[owner_id])
@@ -55,6 +55,7 @@ class User(Base):
     age = Column(Integer)
     home_location = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=False), nullable=False, server_default=text('now()'))
+    is_banned=Column(Boolean,server_default='False',nullable=False)
 
     __table_args__ = (
         CheckConstraint(
