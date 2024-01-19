@@ -27,7 +27,7 @@ tags_metadata = [
     },
     {
         "name": "Activity History",
-        "description": "API endpoints for retrieving historical data"
+        "description": "API endpoints for retrieving historical data (admins activity)"
     }
 ]
 
