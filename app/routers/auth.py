@@ -6,7 +6,7 @@ from ..database import get_db
 
 
 
-router=APIRouter(tags=['Authentication'])
+router=APIRouter(prefix="/login")
 
 
 # Login admin and user endpoint
@@ -53,7 +53,7 @@ def login_admin(user_credentials: OAuth2PasswordRequestForm=Depends(), db: Sessi
 # As a solution we will fuse both endpoints to achieve login for both user and admin from the same endpoint while having always one token
 # The reason of having one token is for security reasons: YOU CAN'T BE AUTHENTICATED FOR BEING AS USER AND ADMIN AT THE SAME TIME
 
-@router.post('/login', response_model=schemas.Token)
+@router.post('/', response_model=schemas.Token)
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
 
     user = db.query(models.User).filter(models.User.phone_number == user_credentials.username).first()

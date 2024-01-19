@@ -8,10 +8,7 @@ from typing import List, Optional
 from ..config import settings
 
 
-router=APIRouter(
-    prefix="/admins",
-    tags=['Admins']
-)
+router=APIRouter(prefix="/admins")
 
 #ADMIN KEY
 ADMINKEY=settings.adminkey

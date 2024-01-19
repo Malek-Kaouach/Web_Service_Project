@@ -6,13 +6,44 @@ from .config import settings
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
 
-app.include_router(auth.router)
-app.include_router(alert.router)
-app.include_router(user.router)
-app.include_router(admin.router)
-app.include_router(history.router)
+# Create tags names and description 
+tags_metadata = [
+    {
+        "name": "Authentication",
+        "description": "API endpoints for user authentication"
+    },
+    {
+        "name": "Alerts",
+        "description": "API endpoints for managing alerts"
+    },
+    {
+        "name": "Users",
+        "description": "API endpoints for managing user data"
+    },
+    {
+        "name": "Admins",
+        "description": "API endpoints for administrative tasks"
+    },
+    {
+        "name": "Activity History",
+        "description": "API endpoints for retrieving historical data"
+    }
+]
+
+
+app = FastAPI(
+    title="Accident Report API",
+    description="Transportation API: Accident Assistance Support System",
+    openapi_tags=tags_metadata,
+)
+
+
+app.include_router(auth.router, tags=["Authentication"])
+app.include_router(alert.router, tags=["Alerts"])
+app.include_router(user.router, tags=["Users"])
+app.include_router(admin.router, tags=["Admins"])
+app.include_router(history.router, tags=["Activity History"])
 
 
 

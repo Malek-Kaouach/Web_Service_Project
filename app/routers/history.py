@@ -14,10 +14,7 @@ from ..googlemaps.maps import set_location, get_coordinates, calculate_distance
 
 
 
-router=APIRouter(
-    prefix="/history",
-    tags=['Activity History']
-)
+router=APIRouter(prefix="/history")
 
 
 
