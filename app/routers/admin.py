@@ -56,7 +56,7 @@ def get_all_admins(db: Session = Depends(get_db),
 
 @router.get('/{id}',response_model=schemas.AdminOut)
 
-def get_admin(id:int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
+def get_admin_by_id(id:int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
 
     admin= db.query(models.Admin).filter(models.Admin.id==id).first()
     if not admin:
@@ -111,7 +111,7 @@ def update_admin(id:int, admin: schemas.AdminCreate, db: Session = Depends(get_d
 # Update current status of admin by ID endpoint
 
 @router.put("/status/{id}",response_model=schemas.AdminOut)
-def update_admin(id:int, admin: schemas.AdminStatus, db: Session = Depends(get_db),
+def update_admin_current_status(id:int, admin: schemas.AdminStatus, db: Session = Depends(get_db),
                  current_admin: int = Depends(oauth2.get_current_admin)):
 
     admin_query=db.query(models.Admin).filter(models.Admin.id==id)

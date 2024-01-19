@@ -24,7 +24,7 @@ router=APIRouter(
 # Get all alerts endpoint
 
 @router.get("/",response_model=List[schemas.PostResponse])
-def get_alerts(db: Session = Depends(get_db),
+def get_all_alerts(db: Session = Depends(get_db),
                current_admin: Optional[models.Admin] = Depends(oauth2.get_admin),
                current_user: Optional[models.User] = Depends(oauth2.get_user),
                limit: Optional[int]=100, skip: Optional[int]=0,
@@ -72,7 +72,7 @@ def create_alert(post:schemas.PostCreate, db: Session = Depends(get_db),
 # Get alert by ID endpoint
 
 @router.get("/{id}",response_model=schemas.PostResponse)
-def get_alert(id: int,db: Session = Depends(get_db),
+def get_alert_by_ID(id: int,db: Session = Depends(get_db),
               current_admin: Optional[models.Admin] = Depends(oauth2.get_admin),
               current_user: Optional[models.User] = Depends(oauth2.get_user)):
     
@@ -98,7 +98,7 @@ def get_alert(id: int,db: Session = Depends(get_db),
 # Get alerts in response radius of admin
 
 @router.get("/inradius/{id}", response_model=List[schemas.NearestAlerts])
-def get_alerts(
+def get_alerts_in_admin_response_radius(
     id: int,
     db: Session = Depends(get_db),
     current_admin: int = Depends(oauth2.get_current_admin)
@@ -123,17 +123,24 @@ def get_alerts(
         # Get the latitude and longitude coordinates for the alert's location
         alert_loc = get_coordinates(alert.location)
 
+        print(admin_loc,"   ",alert_loc)
+
+        distance=None
+
         if admin_loc is not None and alert_loc is not None:
             distance = calculate_distance(admin_loc, alert_loc)
             print(f"distance from alert [{alert.id}] is ",distance)
+
+            # Convert admin.response_radius to a decimal
+            response_radius = Decimal(admin.response_radius)
+
+            if distance is not None and distance <= response_radius:
+                alert_info.append({"id": alert.id, "distance": distance})
+
         else:
             print(f"distance from alert [{alert.id}] is None")
 
-        # Convert admin.response_radius to a decimal
-        response_radius = Decimal(admin.response_radius)
 
-        if distance <= response_radius:
-            alert_info.append({"id": alert.id, "distance": distance})
         
     print(alert_info)
 
@@ -219,7 +226,7 @@ def update_alert(id:int, post:schemas.PostCreate,db: Session = Depends(get_db),
 # Update status alert by ID endpoint and Add the update to History table
 
 @router.put("/status/{id}",response_model=schemas.PostResponse)
-def update_status(id: int, post:schemas.PostStatus, db: Session = Depends(get_db),
+def update_alert_status(id: int, post:schemas.PostStatus, db: Session = Depends(get_db),
                   current_admin: int = Depends(oauth2.get_current_admin)):
 
     alert_query=db.query(models.Post).filter(models.Post.id==id)

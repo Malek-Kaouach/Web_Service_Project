@@ -37,13 +37,13 @@ def get_all_history(db: Session = Depends(get_db),
 
 
 
-# Get activity history by ID endpoint
+# Get activity history by alert ID endpoint
 
-@router.get('/{id}',response_model=schemas.HistoryOut)
+@router.get('/{id}',response_model=List[schemas.HistoryOut])
 
-def get_history(id:int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
+def get_history_by_alert_id(id:int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
 
-    history= db.query(models.History).filter(models.History.alert_id==id).first()
+    history= db.query(models.History).filter(models.History.alert_id==id).all()
     if not history:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"History with alert id: {id} does not exist")
     return history
@@ -55,11 +55,11 @@ def get_history(id:int,db: Session = Depends(get_db),current_admin: int = Depend
 
 @router.get('/admin/{id}',response_model=List[schemas.HistoryOut])
 
-def get_history(id:int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
+def get_activity_history_of_admin_by_admin_id(id:int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
 
     history= db.query(models.History).filter(models.History.admin_id==id).all()
     if not history:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Admin with id: {id} does not exist")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"History of admin activity id: {id} does not exist")
     return history
 
 

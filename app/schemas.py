@@ -69,11 +69,14 @@ class AdminOut(AdminInfo):
 
 
 
-class PostResponse(PostBase):
+class PostResponse(BaseModel):
     id: int
+    title: str
+    content: str
+    location: Optional[str]=""
+    location_link: Optional[str]= "MAPS LINK"
+    published: bool = True
     created_at: datetime
-    #owner_id: int
-    #owner_phone_number: int
     status: str
     owner: UserOut
     
@@ -82,18 +85,15 @@ class PostResponse(PostBase):
 
 
 
-class PostInfo(BaseModel):
-    id: int
-    title: str
-    content: str
-    status: str
-
 
 
 class HistoryOut(BaseModel):
     id: int
     edited_at: datetime
-    alert: PostInfo
+    alert_id: int
+    title: str
+    content: str
+    status: str
     owner: UserInfo
     admin: AdminInfo
 

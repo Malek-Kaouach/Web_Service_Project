@@ -59,7 +59,7 @@ def get_all_users(db: Session = Depends(get_db),
 # Get current user personal info
 
 @router.get('/info/{id}',response_model=schemas.UserDetails)
-def get_user(id:int, user_pwd: schemas.UserPWD, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+def get_current_user_information(id:int, user_pwd: schemas.UserPWD, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
 
     user= db.query(models.User).filter(models.User.id==id).first()
     #add code for dehashing the password
