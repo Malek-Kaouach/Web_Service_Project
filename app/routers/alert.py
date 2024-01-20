@@ -25,12 +25,12 @@ def get_all_alerts(db: Session = Depends(get_db),
                current_admin: Optional[models.Admin] = Depends(oauth2.get_admin),
                current_user: Optional[models.User] = Depends(oauth2.get_user),
                limit: Optional[int]=100, skip: Optional[int]=0,
-               search: Optional[str]= ""): #search filter by title of alert
+               search: Optional[str]= ""): #search filter by status of alert
 
     if current_admin:
         #admin have the access to all the alerts
         # Fetch posts for admins
-        alerts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+        alerts = db.query(models.Post).filter(models.Post.status.contains(search)).limit(limit).offset(skip).all()
 
     elif current_user:
         #user have the access only to his own alerts to view

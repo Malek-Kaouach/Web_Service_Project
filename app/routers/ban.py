@@ -11,7 +11,7 @@ router=APIRouter()
 
 # Ban user by ID
 
-@router.put("/ban/{id}",response_model=schemas.UserOut)
+@router.put("/ban/{id}",response_model=schemas.UserOut4Admin)
 def ban_user(id:int, db: Session = Depends(get_db),
                  current_admin: int = Depends(oauth2.get_current_admin)):
 
@@ -33,7 +33,7 @@ def ban_user(id:int, db: Session = Depends(get_db),
 
 # Unban user by ID
 
-@router.put("/unban/{id}",response_model=schemas.UserOut)
+@router.put("/unban/{id}",response_model=schemas.UserOut4Admin)
 def unban_user(id:int, db: Session = Depends(get_db),
                  current_admin: int = Depends(oauth2.get_current_admin)):
 

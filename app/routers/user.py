@@ -33,7 +33,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 # Get user by id endpoint
 
-@router.get('/{id}',response_model=schemas.UserOut)
+@router.get('/{id}',response_model=schemas.UserOut4Admin)
 def get_user(id:int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
     user= db.query(models.User).filter(models.User.id==id).first()
     if not user:
@@ -44,7 +44,7 @@ def get_user(id:int,db: Session = Depends(get_db),current_admin: int = Depends(o
 
 # Get all users endpoint
 
-@router.get('/', response_model=List[schemas.UserOut])
+@router.get('/', response_model=List[schemas.UserOut4Admin])
 
 def get_all_users(db: Session = Depends(get_db),
                   current_admin: int = Depends(oauth2.get_current_admin),
@@ -124,9 +124,9 @@ def update_user(id:int, user: schemas.UserCreate, db: Session = Depends(get_db),
     return user_query.first()
 
 
-
-# Update password of current user endpoint
 """
+# Update password of current user endpoint
+
 @router.put("/pwd/{id}",response_model=schemas.UserOut)
 def update_pwd(id:int, user: schemas.UserPWD, db: Session = Depends(get_db),
                  current_user: int = Depends(oauth2.get_current_user)):

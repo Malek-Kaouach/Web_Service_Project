@@ -54,16 +54,5 @@ app.include_router(history.router, tags=["Activity History"])
 
 
 
-# @app.get("/")
-# def get_user():
-#     return {"message":"Welcome to my api malek"}
-
-# @app.get("/sqlalchemy")
-# def test_posts(db: Session = Depends(get_db)):
-#     posts=db.query(models.Post).all()
-#     print(posts)
-#     return{"data":"successfull"}
-
-
 
 

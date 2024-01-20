@@ -40,12 +40,12 @@ class UserOut(UserInfo):
     name: str
     age: Optional[int]
     home_location: str
-    is_banned: bool
-
     class config:
         orm_mode=True
 
 
+class UserOut4Admin(UserOut):
+    is_banned: bool
     class config:
         orm_mode=True
 
