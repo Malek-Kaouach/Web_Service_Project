@@ -66,7 +66,7 @@ def get_admin_by_id(id:int,db: Session = Depends(get_db),current_admin: int = De
 # Delete admin endpoint
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_own_admin_account(id: int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
+def delete_admin(id: int,db: Session = Depends(get_db),current_admin: int = Depends(oauth2.get_current_admin)):
 
     admin_query=db.query(models.Admin).filter(models.Admin.id==id)
     admin_2delete=admin_query.first()
@@ -74,8 +74,6 @@ def delete_own_admin_account(id: int,db: Session = Depends(get_db),current_admin
     if admin_2delete==None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Admin with id: {id} does not exist")
     
-    if admin_2delete.id!=current_admin.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
 
     admin_query.delete(synchronize_session=False)
     db.commit()
