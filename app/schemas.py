@@ -27,7 +27,8 @@ class AdminStatus(BaseModel):
 
 
 class UserPWD(BaseModel):
-    password: str
+    oldpassword: str
+    newpassword: str
 
 
 
@@ -90,7 +91,6 @@ class PostResponse(BaseModel):
 
 
 
-
 class HistoryOut(BaseModel):
     id: int
     edited_at: datetime
@@ -119,6 +119,13 @@ class UserCreate(BaseModel):
     age: Optional[int] = None
     home_location: str
 
+class UserUpdate(BaseModel):
+    phone_number: str
+    name: str
+    age: Optional[int] = None
+    home_location: str
+
+
 
 class AdminCreate(BaseModel):
     name: str
@@ -127,6 +134,15 @@ class AdminCreate(BaseModel):
     availability: Optional[str] = "24/7"
     response_radius: Optional[int]= 50
     current_status: Optional[str]= 'unknown'
+
+
+class AdminUpdate(BaseModel):
+    name: str
+    location: str
+    availability: Optional[str] = "24/7"
+    response_radius: Optional[int]= 50
+    current_status: Optional[str]= 'unknown'
+
 
 
 

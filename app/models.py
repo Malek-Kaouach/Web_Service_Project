@@ -36,8 +36,8 @@ class History(Base):
     location=Column(String,nullable=False)
     location_link=Column(String,nullable=False)
     edited_at=Column(TIMESTAMP(timezone=False),nullable=False,server_default=text('now()'))
-    owner_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=False)
-    admin_id = Column(Integer, ForeignKey("admins.id", ondelete="SET NULL"), nullable=False)
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"))
+    admin_id = Column(Integer, ForeignKey("admins.id", ondelete="SET NULL"))
     status=Column(String,server_default='Waiting for response',nullable=False)
 
     owner = relationship ("User", foreign_keys=[owner_id])
@@ -80,3 +80,5 @@ class Admin(Base):
     availability=Column(String, nullable=False)
     response_radius=Column(Integer,nullable=False)
     current_status=Column(String,nullable=False)
+
+
