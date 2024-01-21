@@ -51,11 +51,6 @@ class UserOut4Admin(UserOut):
         orm_mode=True
 
 
-class UserDetails(UserOut):
-    password: str
-
-
-
 class AdminInfo(BaseModel):
     id: int
     name: str

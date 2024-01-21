@@ -70,6 +70,11 @@ def delete_admin(id: int,db: Session = Depends(get_db),current_admin: int = Depe
 
     admin_query=db.query(models.Admin).filter(models.Admin.id==id)
     admin_2delete=admin_query.first()
+    print(admin_2delete.id)
+    print(id)
+
+    if current_admin.id!=id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
 
     if admin_2delete==None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Admin with id: {id} does not exist")
@@ -81,17 +86,11 @@ def delete_admin(id: int,db: Session = Depends(get_db),current_admin: int = Depe
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-
-
 # Update admin by ID endpoint
 
 @router.put("/{id}",response_model=schemas.AdminOut)
 def update_admin(id:int, admin: schemas.AdminUpdate, db: Session = Depends(get_db),
                  current_admin: int = Depends(oauth2.get_current_admin)):
-    
-    #hash the password - admin.password
-    hashed_password=utils.hash(admin.password)
-    admin.password=hashed_password
 
     admin_query=db.query(models.Admin).filter(models.Admin.id==id)
     admin_2update=admin_query.first()
